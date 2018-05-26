@@ -1,0 +1,7 @@
+{
+    "python.autoComplete.extraPaths": [
+        "ros/devel/lib/python2.7/dist-packages"
+    ],
+    "python.linting.pylintEnabled": true,
+    "python.linting.enabled": true
+}
