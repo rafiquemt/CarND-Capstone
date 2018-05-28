@@ -4,6 +4,7 @@ build
 devel
 
 profile.tmp
+models/
 data/dbw_test.rosbag.bag
 ros/src/twist_controller/brakes.csv
 ros/src/twist_controller/steers.csv
