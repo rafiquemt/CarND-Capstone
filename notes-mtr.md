@@ -83,3 +83,25 @@ more how to go through logging files
 Overview notes:
 https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/0bf289a5-8890-48f4-918a-bab4f49e0019/concepts/828147cb-cf85-4d12-94b5-a18fd70f9d23
 
+
+## Traffic light detector
+
+Running training commands
+`python object_detection/train.py --pipeline_config_path=config/ssd_inception-traffic-udacity_sim.config --train_dir=data/sim_training_data/sim_data_capture`
+
+For the model to work on carla, it must be exported using model v 1.3
+`git checkout -b r1.3 9a811d95c478b062393debd1559df61490b97149`
+
+`python object_detection/export_inference_graph.py --pipeline_config_path=config/ssd_inception-traffic-udacity_sim.config --trained_checkpoint_prefix=data/sim_training_data/sim_data_capture/model.ckpt-5000 --output_directory=frozen_models/frozen_sim_ssd_inception/`
+
+Then go back to r1.5
+`git checkout r1.5`
+
+For real images, 
+
+Train:
+
+`python object_detection/train.py --pipeline_config_path=config/ssd_inception-traffic_udacity_real.config --train_dir=data/real_training_data`
+
+Export:
+
