@@ -19,9 +19,9 @@
     <include file="$(find tl_detector)/launch/tl_detector.launch"/>
 
     <!--Traffic Light Locations and Camera Config -->
-    <param name="traffic_light_config" textfile="$(find tl_detector)/sim_traffic_light_config.yaml" />
+    <param name="traffic_light_config" textfile="$(find tl_detector)/sim_traffic_light_config.yaml"/>
 
     <!--Traffic Light Locations and Camera Config -->
-    <param name="model_graph" textfile="$(find tl_detector)/light_classification/models/sim_ssd_inception/frozen_inference_graph.pb" />
-
+    <param name="model_graph" value="$(find tl_detector)/light_classification/models/sim_ssd_inception/frozen_inference_graph.pb"/>
+    
 </launch>
