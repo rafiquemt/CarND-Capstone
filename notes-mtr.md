@@ -83,8 +83,20 @@ more how to go through logging files
 Overview notes:
 https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/e1a23b06-329a-4684-a717-ad476f0d8dff/lessons/0bf289a5-8890-48f4-918a-bab4f49e0019/concepts/828147cb-cf85-4d12-94b5-a18fd70f9d23
 
+## Running with image recognition on simulator
+
+https://discussions.udacity.com/t/steering-works-at-20hz-but-not-50hz/750960
+This post suggests lowering the look ahead and rate of waypoint generation
 
 ## Traffic light detector
+
+setting up udacity-ami on aws for training
+
+https://classroom.udacity.com/nanodegrees/nd013/parts/6047fe34-d93c-4f50-8336-b70ef10cb4b2/modules/595f35e6-b940-400f-afb2-2015319aa640/lessons/b6de6f99-281f-44e8-a9df-196577204638/concepts/1f496bc5-022b-4bff-b30c-cb3bc6eeae98
+
+Using instructions from https://github.com/coldKnight/TrafficLight_Detection-TensorFlowAPI/blob/master/README.md
+with hints from: 
+https://github.com/stefancyliax/CarND-Capstone/blob/master/ros/src/tl_detector/light_classification/frozen_models/training.md
 
 Running training commands
 `python object_detection/train.py --pipeline_config_path=config/ssd_inception-traffic-udacity_sim.config --train_dir=data/sim_training_data/sim_data_capture`
