@@ -97,11 +97,33 @@ For the model to work on carla, it must be exported using model v 1.3
 Then go back to r1.5
 `git checkout r1.5`
 
-For real images, 
+For real world images, 
 
 Train:
 
 `python object_detection/train.py --pipeline_config_path=config/ssd_inception-traffic_udacity_real.config --train_dir=data/real_training_data`
 
 Export:
+
+`python object_detection/export_inference_graph.py --pipeline_config_path=config/ssd_inception-traffic_udacity_real.config --trained_checkpoint_prefix=data/real_training_data/model.ckpt-5000 --output_directory=frozen_models/frozen_real_ssd_inception/`
+
+
+### What versions of tensorflow models are required ? 
+
+You'll want an earlier version: r1.5
+https://github.com/tensorflow/models/tree/r1.5
+Checkout r1.5 branch so that you can run these models against tensorflow v 1.3.
+
+Note that the version of tensorflow is completely independent of the the tensorflow models repo. That's why you need to manually 
+sync back to a point in time where tensorflow 1.3 worked with tensorflow/models repo. That's r1.5 branch
+
+Now the issue is that exporting the models must also be done in a compatible way. Turns out only back in October 2017 did the 
+tensorflow/model repo export script work with tensorflow. 
+So to export, you have to checkout an even older commit.
+
+```
+cd ~/tensorflow/models
+git checkout 9a811d95c478b062393debd1559df61490b97149
+```
+
 
