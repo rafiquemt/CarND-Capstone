@@ -15,28 +15,23 @@ import yaml
 STATE_COUNT_THRESHOLD = 3
 
 class TLDetector(object):
+    
+    map_TrafficLight_Color = {
+        TrafficLight.RED: "Red",
+        TrafficLight.GREEN: "Green",
+        TrafficLight.YELLOW: "Yellow",
+        TrafficLight.UNKNOWN: "Unknown"
+    }
+
     def __init__(self):
         rospy.init_node('tl_detector')
-
+        self.image_counter = -1
         self.pose = None
         self.waypoints = None
         self.waypoints_2d = None
         self.waypoint_tree = None
         self.camera_image = None
         self.lights = []
-
-        sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
-        sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
-
-        '''
-        /vehicle/traffic_lights provides you with the location of the traffic light in 3D map space and
-        helps you acquire an accurate ground truth data source for the traffic light
-        classifier by sending the current color state of all traffic lights in the
-        simulator. When testing on the vehicle, the color state will not be available. You'll need to
-        rely on the position of the light and the camera image to predict it.
-        '''
-        sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
-        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
 
         config_string = rospy.get_param("/traffic_light_config")
         self.config = yaml.load(config_string)
@@ -50,7 +45,22 @@ class TLDetector(object):
         self.state = TrafficLight.UNKNOWN
         self.last_state = TrafficLight.UNKNOWN
         self.last_wp = -1
+        self._delay_state = TrafficLight.UNKNOWN
+        self._delay_wp = -1
         self.state_count = 0
+
+        sub1 = rospy.Subscriber('/current_pose', PoseStamped, self.pose_cb)
+        sub2 = rospy.Subscriber('/base_waypoints', Lane, self.waypoints_cb)
+
+        '''
+        /vehicle/traffic_lights provides you with the location of the traffic light in 3D map space and
+        helps you acquire an accurate ground truth data source for the traffic light
+        classifier by sending the current color state of all traffic lights in the
+        simulator. When testing on the vehicle, the color state will not be available. You'll need to
+        rely on the position of the light and the camera image to predict it.
+        '''
+        sub3 = rospy.Subscriber('/vehicle/traffic_lights', TrafficLightArray, self.traffic_cb)
+        sub6 = rospy.Subscriber('/image_color', Image, self.image_cb)
 
         rospy.spin()
 
@@ -76,10 +86,41 @@ class TLDetector(object):
             msg (Image): image from car-mounted camera
 
         """
+        self.image_counter = self.image_counter + 1
+
+
         self.has_image = True
         self.camera_image = msg
-        light_wp, state = self.process_traffic_lights()
 
+
+        # only for testing local real lights bag
+        testing_lights_bag = False
+        if testing_lights_bag:
+            if not self.image_counter % 5 == 0:
+                rospy.logwarn("Skipping image")
+                return
+            rospy.logwarn("Received image")
+            #cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+            cv_image_rgb = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
+            # cv_image_rgb = cv2.cvtColor(cv_image, cv2.COLOR_BGR2RGB)
+            #light_state = self.light_classifier.get_classification(cv_image)
+            light_state_rgb = self.light_classifier.get_classification(cv_image_rgb)
+            rospy.logwarn("Light State - RGB: %s", self.map_TrafficLight_Color[light_state_rgb])
+            return
+
+        # == Uncomment for local simulator testing since hardware can't keep up with image incoming rate
+        # if not self.image_counter % 5 == 0:
+        #     rospy.logwarn("Skipping image")
+        #     light_wp = self._delay_wp
+        #     state = self._delay_state
+        # else:
+        #     light_wp, state = self.process_traffic_lights()
+        #     self._delay_state = state
+        #     self._delay_wp = light_wp
+
+        light_wp, state = self.process_traffic_lights()
+        self._delay_state = state
+        self._delay_wp = light_wp
         '''
         Publish upcoming red lights at camera frequency.
         Each predicted state has to occur `STATE_COUNT_THRESHOLD` number
@@ -118,9 +159,10 @@ class TLDetector(object):
         
         if(not self.has_image):
             self.prev_light_loc = None
-            return False
+            return TrafficLight.UNKNOWN
 
-        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "bgr8")
+        # classifier was trained using rgb images. so feed in rgb images
+        cv_image = self.bridge.imgmsg_to_cv2(self.camera_image, "rgb8")
 
         #Get classification
         return self.light_classifier.get_classification(cv_image)
@@ -139,7 +181,7 @@ class TLDetector(object):
 
         # List of positions that correspond to the line to stop in front of for a given intersection
         stop_line_positions = self.config['stop_line_positions']
-        if(self.pose):
+        if(self.pose and self.lights):
             car_wp_idx = self.get_closest_waypoint(self.pose.pose.position.x, self.pose.pose.position.y)
 
             diff = len(self.waypoints.waypoints)
@@ -154,7 +196,7 @@ class TLDetector(object):
                 
         if closest_light:
             state = self.get_light_state(closest_light)
-            rospy.logwarn("Found Traffic light state: %s away: %s units", state, line_wp_idx - car_wp_idx)
+            rospy.logwarn("Found Traffic light state: %s away: %s units", self.map_TrafficLight_Color[state], line_wp_idx - car_wp_idx)
             return line_wp_idx, state
 
         return -1, TrafficLight.UNKNOWN
