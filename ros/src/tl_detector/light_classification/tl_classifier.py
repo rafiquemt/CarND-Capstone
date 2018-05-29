@@ -21,6 +21,8 @@ class TLClassifier(object):
     }
 
     def __init__(self, model_graph):
+        # --- The classifier is built using instructions and data from
+        # https://github.com/coldKnight/TrafficLight_Detection-TensorFlowAPI/blob/master/README.md
         #Initialize tensorflow to use checked in model graph
         rospy.logwarn("Loading Model: %s", model_graph)
         graph = tf.Graph()
